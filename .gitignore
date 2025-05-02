@@ -1,0 +1,58 @@
+## Build results
+bin/
+obj/
+out/
+
+## User-specific files
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+## Visual Studio
+.vscode/
+.vs/
+*.csproj.user
+
+## ASP.NET / Blazor
+wwwroot/appsettings*.json
+appsettings*.json
+wwwroot/node_modules/
+*.db
+
+## WebAssembly cache
+**/obj/Debug/net*/browser-wasm/
+**/bin/Debug/net*/browser-wasm/
+
+## Logs
+*.log
+
+## Dependency directories
+node_modules/
+bower_components/
+
+## Environment files
+.env
+.env.*
+
+## Others
+*.pdb
+*.mdb
+*.cache
+*.dll
+*.exe
+
+# Rider / JetBrains
+.idea/
+
+# DotCover
+.idea/.dotCover
+
+# Backup files
+*~ 
+*.bak
+*.tmp
+*.swp
+
+# Publish folder
+publish/
