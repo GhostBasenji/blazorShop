@@ -1,0 +1,50 @@
+﻿@page "/addproduct"
+@inject Data.DbContext Db
+@inject NavigationManager Nav
+@using Data.Models
+
+<h3>Добавление нового товара</h3>
+
+<EditForm Model="product" OnValidSubmit="Save">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Название:</label>
+        <InputText @bind-Value="product.NameProduct" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Цена:</label>
+        <InputNumber @bind-Value="product.Price" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Категория (ID):</label>
+        <InputNumber @bind-Value="product.CategoryId" class="form-control" />
+    </div>
+
+    <div class="form-check mb-3">
+        <InputCheckbox @bind-Value="product.IsHidden" class="form-check-input" />
+        <label class="form-check-label">Скрыт</label>
+    </div>
+
+    <button type="submit" class="btn btn-success">Сохранить</button>
+    <button type="button" class="btn btn-secondary" @onclick="Cancel">Отмена</button>
+</EditForm>
+
+@code {
+    Product product = new();
+
+    void Save()
+    {
+        Db.Products.Add(product);
+        Db.SaveChanges();
+        Nav.NavigateTo("/products");
+    }
+
+    void Cancel()
+    {
+        Nav.NavigateTo("/products");
+    }
+}
