@@ -16,7 +16,7 @@ public partial class DbContext : Microsoft.EntityFrameworkCore.DbContext
     {
     }
 
-    public virtual DbSet<Category> Categories { get; set; }
+    public virtual DbSet<Category> Categories { get; set; } = null!;
 
     public virtual DbSet<Customer> Customers { get; set; }
 

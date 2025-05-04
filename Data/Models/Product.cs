@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Data.Models;
 
@@ -7,7 +8,7 @@ public partial class Product
 {
     public int ProductId { get; set; }
 
-    public string NameProduct { get; set; } = null!;
+    public string NameProduct { get; set; } = string.Empty;
 
     public decimal Price { get; set; }
 

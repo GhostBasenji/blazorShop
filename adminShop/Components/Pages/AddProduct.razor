@@ -1,16 +1,18 @@
 ﻿@page "/addproduct"
+@using Data.Models
+@using System.ComponentModel.DataAnnotations
 @inject Data.DbContext Db
 @inject NavigationManager Nav
-@using Data.Models
+@using Microsoft.EntityFrameworkCore;
 
-<h3>Добавление нового товара</h3>
+<h3>Добавить товар</h3>
 
-<EditForm Model="product" OnValidSubmit="Save">
+<EditForm Model="@product" OnValidSubmit="@Save" FormName="AddProductForm">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
     <div class="mb-3">
-        <label>Название:</label>
+        <label>Название товара:</label>
         <InputText @bind-Value="product.NameProduct" class="form-control" />
     </div>
 
@@ -20,13 +22,24 @@
     </div>
 
     <div class="mb-3">
-        <label>Категория (ID):</label>
-        <InputNumber @bind-Value="product.CategoryId" class="form-control" />
+        <label>Категория:</label>
+        <InputSelect @bind-Value="selectedCategoryId" class="form-control">
+            <option value="0">-- выберите категорию --</option>
+            @foreach (var cat in categories)
+            {
+                <option value="@cat.CategoryId">@cat.NameCategories</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="mb-3">
+        <label>Или введите новую категорию:</label>
+        <InputText @bind-Value="newCategoryName" class="form-control" />
     </div>
 
     <div class="form-check mb-3">
         <InputCheckbox @bind-Value="product.IsHidden" class="form-check-input" />
-        <label class="form-check-label">Скрыт</label>
+        <label class="form-check-label">Скрыть</label>
     </div>
 
     <button type="submit" class="btn btn-success">Сохранить</button>
@@ -35,11 +48,37 @@
 
 @code {
     Product product = new();
+    List<Category> categories = new();
+    int selectedCategoryId = 0;
+    string newCategoryName = string.Empty;
 
-    void Save()
+    protected override void OnInitialized()
     {
+        categories = Db.Categories.ToList();
+    }
+
+    async Task Save()
+    {
+        // Выбор между существующей и новой категорией
+        if (!string.IsNullOrWhiteSpace(newCategoryName))
+        {
+            var newCategory = new Category { NameCategories = newCategoryName };
+            Db.Categories.Add(newCategory);
+            await Db.SaveChangesAsync(); // обязательно сохранить, чтобы получить CategoryId
+            product.CategoryId = newCategory.CategoryId;
+        }
+        else if (selectedCategoryId > 0)
+        {
+            product.CategoryId = selectedCategoryId;
+        }
+        else
+        {
+            // Ни категория, ни имя — ошибка
+            return;
+        }
+
         Db.Products.Add(product);
-        Db.SaveChanges();
+        await Db.SaveChangesAsync();
         Nav.NavigateTo("/products");
     }
 
