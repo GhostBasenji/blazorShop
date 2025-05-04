@@ -1,85 +1,86 @@
 ﻿@page "/addproduct"
 @using Data.Models
-@using System.ComponentModel.DataAnnotations
 @inject Data.DbContext Db
 @inject NavigationManager Nav
-@using Microsoft.EntityFrameworkCore;
+
 
 <h3>Добавить товар</h3>
 
-<EditForm Model="@product" OnValidSubmit="@Save" FormName="AddProductForm">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+@if (categories.Count == 0)
+{
+    <p><em>Загрузка категорий...</em></p>
+}
+else
+{
+    <EditForm Model="@product" OnValidSubmit="@Save" FormName="AddProductForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-    <div class="mb-3">
-        <label>Название товара:</label>
-        <InputText @bind-Value="product.NameProduct" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label>Название товара:</label>
+            <InputText @bind-Value="product.NameProduct" class="form-control" />
+        </div>
 
-    <div class="mb-3">
-        <label>Цена:</label>
-        <InputNumber @bind-Value="product.Price" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label>Цена:</label>
+            <InputNumber @bind-Value="product.Price" class="form-control" />
+        </div>
 
-    <div class="mb-3">
-        <label>Категория:</label>
-        <InputSelect @bind-Value="selectedCategoryId" class="form-control">
-            <option value="0">-- выберите категорию --</option>
-            @foreach (var cat in categories)
-            {
-                <option value="@cat.CategoryId">@cat.NameCategories</option>
-            }
-        </InputSelect>
-    </div>
+        <div class="mb-3">
+            <label>Категория:</label>
+            <InputSelect @bind-Value="selectedCategoryId" class="form-control" @typeparam="int">
+                <option value="0">-- выберите категорию --</option>
+                @foreach (var cat in categories)
+                {
+                    <option value="@cat.CategoryId">@cat.NameCategories</option>
+                }
+            </InputSelect>
+        </div>
 
-    <div class="mb-3">
-        <label>Или введите новую категорию:</label>
-        <InputText @bind-Value="newCategoryName" class="form-control" />
-    </div>
+        <div class="form-check mb-3">
+            <InputCheckbox @bind-Value="product.IsHidden" class="form-check-input" />
+            <label class="form-check-label">Скрыть</label>
+        </div>
 
-    <div class="form-check mb-3">
-        <InputCheckbox @bind-Value="product.IsHidden" class="form-check-input" />
-        <label class="form-check-label">Скрыть</label>
-    </div>
-
-    <button type="submit" class="btn btn-success">Сохранить</button>
-    <button type="button" class="btn btn-secondary" @onclick="Cancel">Отмена</button>
-</EditForm>
+        <button type="submit" class="btn btn-success">Сохранить</button>
+        <button type="button" class="btn btn-secondary" @onclick="Cancel">Отмена</button>
+    </EditForm>
+}
 
 @code {
     Product product = new();
     List<Category> categories = new();
     int selectedCategoryId = 0;
-    string newCategoryName = string.Empty;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        categories = Db.Categories.ToList();
+        categories = await Db.Categories.ToListAsync();
+        StateHasChanged(); // обновляем интерфейс после загрузки
     }
 
     async Task Save()
     {
-        // Выбор между существующей и новой категорией
-        if (!string.IsNullOrWhiteSpace(newCategoryName))
+        Console.WriteLine($"Выбранная категория: {selectedCategoryId}");
+
+        if (selectedCategoryId == 0)
         {
-            var newCategory = new Category { NameCategories = newCategoryName };
-            Db.Categories.Add(newCategory);
-            await Db.SaveChangesAsync(); // обязательно сохранить, чтобы получить CategoryId
-            product.CategoryId = newCategory.CategoryId;
-        }
-        else if (selectedCategoryId > 0)
-        {
-            product.CategoryId = selectedCategoryId;
-        }
-        else
-        {
-            // Ни категория, ни имя — ошибка
+            Console.WriteLine("Категория не выбрана.");
             return;
         }
 
-        Db.Products.Add(product);
-        await Db.SaveChangesAsync();
-        Nav.NavigateTo("/products");
+        product.CategoryId = selectedCategoryId;
+
+        try
+        {
+            Db.Products.Add(product);
+            await Db.SaveChangesAsync();
+            Console.WriteLine("Товар сохранён");
+            Nav.NavigateTo("/products");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка при сохранении: {ex.Message}");
+        }
     }
 
     void Cancel()

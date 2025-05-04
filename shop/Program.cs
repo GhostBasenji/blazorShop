@@ -1,8 +1,11 @@
-using Microsoft.EntityFrameworkCore;
+using Data;
+using Data.Models;
 using shop.Components;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<DbContext>(options =>
+
+builder.Services.AddDbContext<Data.DbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.

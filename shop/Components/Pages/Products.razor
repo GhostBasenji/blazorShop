@@ -1,0 +1,43 @@
+﻿@page "/"
+@page "/products"
+@using Data.Models
+@inject Data.DbContext Db
+
+<h3>Товары</h3>
+
+@if (products == null)
+{
+    <p>Загрузка...</p>
+}
+else if (!products.Any())
+{
+    <p>Нет доступных товаров.</p>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var product in products)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@product.NameProduct</h5>
+                        <p class="card-text">Цена: @product.Price ₽</p>
+                        <p class="card-text text-muted">Категория: @product.Category?.NameCategories</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    List<Product> products;
+
+    protected override void OnInitialized()
+    {
+        products = Db.Products
+            .Where(p => !p.IsHidden)
+            .ToList();
+    }
+}

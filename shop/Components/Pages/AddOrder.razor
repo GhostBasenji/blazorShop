@@ -1,0 +1,90 @@
+﻿@page "/addorder"
+@using Data.Models
+@inject Data.DbContext Db
+@inject NavigationManager Nav
+
+<h3>Добавить заказ</h3>
+
+<EditForm Model="@order" OnValidSubmit="@SaveOrder">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Выберите клиента:</label>
+        <InputSelect @bind-Value="order.CustomerId" class="form-control">
+            <option value="0">-- выберите клиента --</option>
+            @foreach (var customer in customers)
+            {
+                <option value="@customer.CustomerId">@customer.FirstName</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="mb-3">
+        <label>Адрес доставки:</label>
+        <InputText @bind-Value="order.DeliveryAddress" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Добавьте товары в заказ:</label>
+        @foreach (var product in products)
+        {
+            <div>
+                <label>@product.NameProduct</label>
+                <InputNumber @bind-Value="orderItems[product.ProductId]" class="form-control" min="1" />
+            </div>
+        }
+    </div>
+
+    <button type="submit" class="btn btn-success">Сохранить заказ</button>
+    <button type="button" class="btn btn-secondary" @onclick="Cancel">Отмена</button>
+</EditForm>
+
+@code {
+    Order order = new Order();
+    Dictionary<int, int> orderItems = new Dictionary<int, int>();  // Key: ProductId, Value: Quantity
+    List<Customer> customers = new List<Customer>();
+    List<Product> products = new List<Product>();
+
+    protected override void OnInitialized()
+    {
+        customers = Db.Customers.ToList();
+        products = Db.Products.ToList();
+    }
+
+    async Task SaveOrder()
+    {
+        // Проверка на выбор клиента
+        if (order.CustomerId == 0)
+        {
+            Console.WriteLine("Выберите клиента.");
+            return;
+        }
+
+        // Создание нового заказа
+        order.OrderDate = DateTime.Now;
+        Db.Orders.Add(order);
+        await Db.SaveChangesAsync();
+
+        // Добавление товаров в заказ
+        foreach (var item in orderItems)
+        {
+            var orderItem = new OrderItem
+                {
+                    OrderId = order.OrderId,
+                    ProductId = item.Key,
+                    Quantity = item.Value
+                };
+            Db.OrderItems.Add(orderItem);
+        }
+        await Db.SaveChangesAsync();
+
+        Console.WriteLine("Заказ сохранён.");
+        Nav.NavigateTo("/orders");
+    }
+
+    void Cancel()
+    {
+        Nav.NavigateTo("/orders");
+    }
+}

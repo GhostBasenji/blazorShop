@@ -26,6 +26,8 @@ public partial class DbContext : Microsoft.EntityFrameworkCore.DbContext
 
     public virtual DbSet<Product> Products { get; set; }
 
+    public virtual DbSet<CartItem> CartItems { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Category>(entity =>
