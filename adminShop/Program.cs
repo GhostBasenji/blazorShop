@@ -1,10 +1,15 @@
 using adminShop.Components;
+using Microsoft.EntityFrameworkCore;
+using ShopData.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddDbContext<ShopDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ShopDbConnection")));
 
 var app = builder.Build();
 
