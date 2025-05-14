@@ -4,12 +4,15 @@ using ShopData.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContextFactory<ShopDbContext>(options => options.UseSqlServer(connectionString));
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddDbContext<ShopDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("ShopDbConnection")));
+builder.Services.AddDbContextFactory<ShopDbContext>(options =>
+    options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 

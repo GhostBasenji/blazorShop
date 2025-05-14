@@ -13,7 +13,7 @@ public partial class Product
     public int ProductId { get; set; }
 
     [StringLength(50)]
-    public string NameProduct { get; set; } = null!;
+    public string NameProduct { get; set; }
 
     [Column(TypeName = "decimal(10, 2)")]
     public decimal Price { get; set; }
@@ -23,7 +23,7 @@ public partial class Product
 
     [ForeignKey("CategoryId")]
     [InverseProperty("Products")]
-    public virtual Category Category { get; set; } = null!;
+    public virtual Category Category { get; set; }
 
     [InverseProperty("Product")]
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();

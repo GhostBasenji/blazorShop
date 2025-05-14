@@ -1,0 +1,83 @@
+﻿@page "/products"
+@inject ShopDbContext DbContext
+
+<h3 class="mb-4">Список товаров</h3>
+
+<div class="mb-3">
+    <label for="categorySelect" class="form-label">Фильтр по категории:</label>
+    <select id="categorySelect" class="form-select" @onchange="OnCategoryChanged">
+        <option value="">-- Все категории --</option>
+        @foreach (var category in categories)
+        {
+            <option value="@category.CategoryId" selected="@(selectedCategoryId == category.CategoryId)">
+                @category.NameCategories
+            </option>
+        }
+    </select>
+</div>
+
+@if (products == null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else if (!products.Any())
+{
+    <div class="alert alert-warning" role="alert">
+        В этой категории пока нет товаров.
+    </div>
+}
+else
+{
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Название</th>
+                <th>Цена</th>
+                <th>Категория</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in products)
+            {
+                <tr>
+                    <td>@product.NameProduct</td>
+                    <td>@product.Price.ToString("C")</td>
+                    <td>@product.Category?.NameCategories</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Product> products = new();
+    private List<Category> categories = new();
+    private int? selectedCategoryId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await DbContext.Categories.ToListAsync();
+        await LoadProducts();
+    }
+
+    private async Task OnCategoryChanged(ChangeEventArgs e)
+    {
+        var selectedValue = e.Value?.ToString();
+        selectedCategoryId = int.TryParse(selectedValue, out int catId) ? catId : null;
+        await LoadProducts();
+    }
+
+    private async Task LoadProducts()
+    {
+        var query = DbContext.Products
+            .Include(p => p.Category)
+            .AsQueryable();
+
+        if (selectedCategoryId != null)
+        {
+            query = query.Where(p => p.CategoryId == selectedCategoryId);
+        }
+
+        products = await query.ToListAsync();
+    }
+}
