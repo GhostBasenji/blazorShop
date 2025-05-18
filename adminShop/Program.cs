@@ -1,4 +1,7 @@
 using adminShop.Components;
+using ShopData;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
