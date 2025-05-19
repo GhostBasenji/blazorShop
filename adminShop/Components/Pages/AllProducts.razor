@@ -1,0 +1,48 @@
+﻿@page "/allproducts"
+@using Microsoft.EntityFrameworkCore
+@inject ShopDbContext Db
+
+<h3>Список всех товаров</h3>
+
+@if (products == null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else if (!products.Any())
+{
+    <p><strong>Товары не найдены.</strong></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Цена</th>
+                <th>Категория</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in products)
+            {
+                <tr>
+                    <td>@product.NameProduct</td>
+                    <td>@product.Price.ToString("C")</td>
+                    <td>@product.Category?.NameCategories</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Product> products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await Db.Products
+            .Include(p => p.Category)
+            .ToListAsync();
+    }
+}
+
