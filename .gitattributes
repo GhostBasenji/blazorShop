@@ -1,0 +1,10 @@
+* text=auto
+
+# Явно указать окончания строк для определённых типов файлов:
+*.cs     text eol=lf
+*.cshtml text eol=lf
+*.razor  text eol=lf
+*.js     text eol=lf
+*.css    text eol=lf
+*.html   text eol=lf
+*.sh     text eol=lf
