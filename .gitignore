@@ -1,0 +1,81 @@
+## .NET
+bin/
+obj/
+*.user
+*.rsuser
+*.suo
+*.userprefs
+*.csproj.user
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Build results
+*.dll
+*.exe
+*.app
+*.log
+*.vspscc
+*.vssscc
+*.cache
+*.pdb
+
+# Publish results
+publish/
+out/
+
+# dotCover
+.idea/
+
+# Rider
+*.sln.iml
+
+# Others
+_ReSharper*/
+*.ncrunch*
+.*crunch*.local.xml
+*.orig
+*.sdf
+*.VC.db
+*.vscode/
+*.env
+
+## Visual Studio
+.vs/
+.vscode/
+*.dbmdl
+*.bak
+*.backup
+*.mdf
+*.ldf
+*.suo
+*.ntvs_analysis.dat
+
+## User-specific files
+*.user
+*.userosscache
+*.sln.docstates
+
+## Blazor specific
+wwwroot/*.json
+wwwroot/*.db
+wwwroot/service-worker-assets.js
+wwwroot/service-worker.js
+wwwroot/manifest.webmanifest
+
+# Static web assets (Blazor WebAssembly)
+**/obj/**/*.staticwebassets.runtime.json
+**/obj/**/*.staticwebassets.source.json
+**/obj/**/*.staticwebassets.props
+**/obj/**/*.staticwebassets.targets
+
+# dotenv
+.env
+.env.*
+
+# Node
+node_modules/
+
+# Logs
+*.log
+logs/
