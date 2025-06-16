@@ -11,10 +11,17 @@
     <label class="form-label">Product Name</label>
     <input type="text" class="form-control" @bind="nameProduct" />
 </div>
+
 <div class="mb-3">
     <label class="form-label">Price</label>
     <input type="number" step="0.01" class="form-control" @bind="price" />
 </div>
+
+<div class="mb-3">
+    <label class="form-label">Quantity in Stock</label>
+    <input type="number" class="form-control" @bind="quantity" />
+</div>
+
 <div class="mb-3">
     <label class="form-label">Category</label>
     <div class="d-flex gap-2">
@@ -53,10 +60,10 @@
     </div>
 }
 
-
 @code {
     private string nameProduct;
     private decimal price;
+    private int quantity;
     private int selectedCategoryId;
     private List<Category> categories = new();
 
@@ -74,6 +81,7 @@
         {
             NameProduct = nameProduct,
             Price = price,
+            Quantity = quantity,
             CategoryId = selectedCategoryId
         };
 
@@ -99,13 +107,12 @@
 
     private async Task AddCategory()
     {
-        if(!string.IsNullOrWhiteSpace(newCategoryName))
+        if (!string.IsNullOrWhiteSpace(newCategoryName))
         {
             var newCategory = new Category { NameCategories = newCategoryName };
             Db.Categories.Add(newCategory);
             await Db.SaveChangesAsync();
 
-            // Перезагрузка списка и автоматический выбор
             categories = await Db.Categories.ToListAsync();
             selectedCategoryId = newCategory.CategoryId;
 

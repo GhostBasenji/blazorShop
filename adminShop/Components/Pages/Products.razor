@@ -15,27 +15,31 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Name</th>
+                <th>Price</th>
                 <th>Category</th>
-                <th>Price (₽)</th>
-                <th>Actions</th>
+                <th>Quantity</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var product in products)
             {
-                <tr>
-                    <td>@product.ProductId</td>
+                <tr class="@(product.Quantity < 3 ? "table-warning" : "")">
                     <td>@product.NameProduct</td>
+                    <td>@product.Price ₽</td>
                     <td>@product.Category?.NameCategories</td>
-                    <td>@product.Price.ToString("N2")</td>
-                    @*
+                    <td>@product.Quantity</td>
                     <td>
-                        <button class="btn btn-warning btn-sm" @onclick="() => NavigateToUpdate(product.ProductId)">Update</button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteProduct(product.ProductId)">Delete</button>
+                        @if (product.Quantity < 3)
+                        {
+                            <span class="text-danger">⚠ Скоро закончится</span>
+                        }
+                        else
+                        {
+                            <span class="text-success">В наличии</span>
+                        }
                     </td>
-                    *@
                 </tr>
             }
         </tbody>

@@ -1,0 +1,102 @@
+﻿@page "/checkout"
+@using System.ComponentModel.DataAnnotations
+@inject CartService CartService
+@inject shopDbContext Db
+@inject NavigationManager Navigation
+
+<h3>Checkout</h3>
+
+@if (!CartService.GetItems().Any())
+{
+    <p>Your cart is empty. <a href="/products">Go shopping</a></p>
+}
+else
+{
+    <EditForm Model="orderModel" OnValidSubmit="HandleCheckout">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="deliveryAddress" class="form-label">Delivery Address</label>
+            <InputTextArea id="deliveryAddress" class="form-control" @bind-Value="orderModel.DeliveryAddress" />
+        </div>
+
+        <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+            @(isProcessing ? "Processing..." : "Confirm Order")
+        </button>
+    </EditForm>
+}
+
+@code {
+    private bool isProcessing = false;
+
+    // Модель для формы (простейшая)
+    private OrderModel orderModel = new();
+
+    // Временный клиент (пока без аутентификации)
+    private int customerId = 1;
+
+    private async Task HandleCheckout()
+    {
+        isProcessing = true;
+
+        try
+        {
+            // Создаем заказ
+            var order = new Order
+            {
+                CustomerId = customerId,
+                OrderDate = DateTime.Now,
+                DeliveryAddress = orderModel.DeliveryAddress,
+                OrderItems = new List<OrderItem>()
+            };
+
+            // Добавляем позиции из корзины
+            foreach (var item in CartService.GetItems())
+            {
+                if (item.Quantity > 0)
+                {
+                    order.OrderItems.Add(new OrderItem
+                    {
+                        ProductId = item.Product.ProductId,
+                        Quantity = item.Quantity
+                    });
+
+                    // Уменьшаем складской остаток
+                    var product = await Db.Products.FindAsync(item.Product.ProductId);
+                    if (product != null)
+                    {
+                        product.Quantity -= item.Quantity;
+                        if (product.Quantity < 0)
+                            product.Quantity = 0;
+                    }
+                }
+            }
+
+            Db.Orders.Add(order);
+            await Db.SaveChangesAsync();
+
+            // Очищаем корзину
+            CartService.Clear();
+
+            // Перенаправляем
+            Navigation.NavigateTo("/thankyou");
+        }
+        catch (Exception ex)
+        {
+            // Можно добавить обработку ошибок
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+
+    // Простая модель для формы
+    public class OrderModel
+    {
+        [Required(ErrorMessage = "Delivery address is required.")]
+        public string DeliveryAddress { get; set; }
+    }
+}

@@ -1,0 +1,40 @@
+﻿@page "/product/{id:int}"
+@inject IProductService ProductService
+@inject NavigationManager Navigation
+
+<h3>Product Detail</h3>
+
+@if (product == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">@product.NameProduct</h5>
+            <p class="card-text">
+                Price: @product.Price.ToString("C") <br />
+                Category: @product.Category?.NameCategories
+            </p>
+            <button class="btn btn-success">Add to Cart</button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private Product? product;
+
+    protected override async Task OnInitializedAsync()
+    {
+        product = await ProductService.GetProductByIdAsync(id);
+
+        if (product == null)
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+}

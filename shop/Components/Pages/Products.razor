@@ -1,0 +1,65 @@
+﻿@page "/products"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using shopData.Models
+@inject shopDbContext Db
+@inject CartService CartService
+
+<h3>Available Products</h3>
+
+@if (showAddedMessage)
+{
+    <div class="alert alert-success" role="alert">
+        Product added to cart!
+    </div>
+}
+
+@if (products == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (products.Count == 0)
+{
+    <p><em>No products available.</em></p>
+}
+else
+{
+    <div class="row">
+        @foreach (var product in products)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@product.NameProduct</h5>
+                        <p class="card-text">Price: @product.Price.ToString("F2")</p>
+                        <p class="card-text text-muted">In stock: @product.Quantity</p>
+                        <button class="btn btn-primary" @onclick="@(() => AddToCart(product))">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Product> products;
+    private bool showAddedMessage = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await Db.Products.Where(p => p.Quantity > 0).ToListAsync();
+    }
+
+    private async Task AddToCart(Product product)
+    {
+        CartService.AddItem(product, 1);
+        showAddedMessage = true;
+
+        // Ждем 2 секунды и скрываем уведомление
+        await Task.Delay(2000);
+        showAddedMessage = false;
+
+        // Перерисовываем компонент вручную
+        StateHasChanged();
+    }
+}
