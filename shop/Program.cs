@@ -12,6 +12,8 @@ builder.Services.AddScoped<IProductService, ProductService>();
 
 builder.Services.AddScoped<CartService>();
 
+builder.Services.AddScoped<IOrderService, OrderService>();
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

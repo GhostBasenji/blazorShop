@@ -3,6 +3,8 @@
 @inject CartService CartService
 @inject shopDbContext Db
 @inject NavigationManager Navigation
+@inject IOrderService OrderService
+@rendermode InteractiveServer
 
 <h3>Checkout</h3>
 
@@ -38,54 +40,28 @@ else
 
     private async Task HandleCheckout()
     {
+        Console.WriteLine("🟡 HandleCheckout called");
+
         isProcessing = true;
 
         try
         {
-            // Создаем заказ
-            var order = new Order
-            {
-                CustomerId = customerId,
-                OrderDate = DateTime.Now,
-                DeliveryAddress = orderModel.DeliveryAddress,
-                OrderItems = new List<OrderItem>()
-            };
+            var success = await OrderService.PlaceOrderAsync(
+                customerId,
+                orderModel.DeliveryAddress,
+                CartService.GetItems()
+            );
 
-            // Добавляем позиции из корзины
-            foreach (var item in CartService.GetItems())
+            if (success)
             {
-                if (item.Quantity > 0)
-                {
-                    order.OrderItems.Add(new OrderItem
-                    {
-                        ProductId = item.Product.ProductId,
-                        Quantity = item.Quantity
-                    });
-
-                    // Уменьшаем складской остаток
-                    var product = await Db.Products.FindAsync(item.Product.ProductId);
-                    if (product != null)
-                    {
-                        product.Quantity -= item.Quantity;
-                        if (product.Quantity < 0)
-                            product.Quantity = 0;
-                    }
-                }
+                CartService.Clear();
+                Navigation.NavigateTo("/thankyou");
             }
-
-            Db.Orders.Add(order);
-            await Db.SaveChangesAsync();
-
-            // Очищаем корзину
-            CartService.Clear();
-
-            // Перенаправляем
-            Navigation.NavigateTo("/thankyou");
-        }
-        catch (Exception ex)
-        {
-            // Можно добавить обработку ошибок
-            Console.WriteLine(ex.Message);
+            else
+            {
+                // Покажи сообщение об ошибке
+                Console.WriteLine("Order failed.");
+            }
         }
         finally
         {

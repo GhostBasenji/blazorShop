@@ -1,48 +1,54 @@
 ﻿@page "/orders"
+@using shopData.Models
+@using Microsoft.EntityFrameworkCore
 @inject shopDbContext Db
 
-<h3>Orders List</h3>
+<h3>Customer Orders</h3>
 
 @if (orders == null)
 {
-    <p><em>Loading orders...</em></p>
+    <p><em>Loading...</em></p>
 }
 else if (!orders.Any())
 {
-    <p>No orders found.</p>
+    <p><em>No orders have been placed yet.</em></p>
 }
 else
 {
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Order ID</th>
-                <th>Customer ID</th>
-                <th>Order Date</th>
-                <th>Delivery Address</th>
-                <th>Items</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var order in orders)
-            {
-                <tr>
-                    <td>@order.OrderId</td>
-                    <td>@order.CustomerId</td>
-                    <td>@order.OrderDate?.ToString("g")</td>
-                    <td>@order.DeliveryAddress</td>
-                    <td>
-                        <ul>
-                            @foreach (var item in order.OrderItems)
-                            {
-                                <li>@item.Product.NameProduct (Qty: @item.Quantity)</li>
-                            }
-                        </ul>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    @foreach (var order in orders)
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <strong>Order #@order.OrderId</strong><br />
+                Date: @order.OrderDate?.ToString("g")<br />
+                Delivery: @order.DeliveryAddress
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in order.OrderItems)
+                        {
+                            <tr>
+                                <td>@item.Product.NameProduct</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.Product.Price</td>
+                                <td>@(item.Product.Price* item.Quantity)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <strong>Total: @order.OrderItems.Sum(i => i.Product.Price * i.Quantity)</strong>
+            </div>
+        </div>
+    }
 }
 
 @code {
@@ -52,7 +58,8 @@ else
     {
         orders = await Db.Orders
             .Include(o => o.OrderItems)
-            .ThenInclude(oi => oi.Product)
+                .ThenInclude(oi => oi.Product)
+            .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
     }
 }
